@@ -1,0 +1,12 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_ORG_ID = os.getenv('OPENAI_ORG_ID')
+CONFLUENCE_API_TOKEN = os.getenv("CONFLUENCE_API_TOKEN")
+CONFLUENCE_USERNAME = os.getenv('CONFLUENCE_USERNAME')
+CONFLUENCE_URL = os.getenv('CONFLUENCE_URL')
+CONFLUENCE_SPACE = os.getenv('CONFLUENCE_SPACE')
+PERSIST_DIR = os.getenv('PERSIST_DIR')
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL')
