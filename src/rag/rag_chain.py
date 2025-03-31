@@ -3,16 +3,15 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
 from typing import List, Dict, Any
-from config.config import OPENAI_API_KEY, OPENAI_ORG_ID
+from config.config import CHAT_MODEL, OPENAI_API_KEY, OPENAI_ORG_ID
 from src.rag.prompt_template import PromptManager
 from src.vectorstore.load_vectorstore import LoadVectorStore
 
 
 load_dotenv()
 
-
 llm = ChatOpenAI(temperature=0.5, api_key=OPENAI_API_KEY,
-                 organization=OPENAI_ORG_ID, model="gpt-4o-mini",
+                 organization=OPENAI_ORG_ID, model=CHAT_MODEL,
                  )
 
 
@@ -39,7 +38,7 @@ class RAGChain:
                 versioned_responses[version] = []
 
             versioned_responses[version].append({
-                "content": getattr(doc, "page_content", 
+                "content": getattr(doc, "page_content",
                                    "No content available"),
                 "score": doc.metadata.get("similarity", "N/A"),
                 "url": url,
