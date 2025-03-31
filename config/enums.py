@@ -6,6 +6,7 @@ class Constants(Enum):
     ONE = 1
     FIVE = 5
     THREE = 3
+    CSV_FILE = "Search_content.csv"
 
 
 FAILURE_MESSAGES = [

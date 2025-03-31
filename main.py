@@ -1,7 +1,11 @@
+import csv
+from datetime import datetime
+import time
 import streamlit as st
 from config.enums import FAILURE_MESSAGES, Constants
 from src.rag.rag_chain import RAGChain
 from src.vectorstore.load_vectorstore import LoadVectorStore
+from streamlit_star_rating import st_star_rating
 
 
 class DocumentSearchApp:
@@ -12,6 +16,34 @@ class DocumentSearchApp:
                 {"role": "assistant", "content": "Hello, how can I assist you?"}]
         st.session_state.setdefault("vectorstore", LoadVectorStore())
         st.session_state.setdefault("rag_chain", RAGChain())
+        if "pending_interaction" not in st.session_state:
+            st.session_state.pending_interaction = None
+        self.csv_file = Constants.CSV_FILE.value
+        self.initialize_csv()
+
+    def initialize_csv(self):
+        try:
+            with open(
+                    self.csv_file, mode="a+",
+                    newline="", encoding="utf-8") as file:
+                file.seek(0)
+                if not file.read(1):
+                    writer = csv.writer(file)
+                    writer.writerow(
+                        ["Timestamp", "Question", "Answer", "Rating"])
+        except Exception as e:
+            print("Error initializing CSV file:", e)
+
+    def save_to_csv(self, timestamp, question, answer, rating):
+        try:
+            with open(
+                    self.csv_file, mode="a",
+                    newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                writer.writerow([timestamp, question, answer, rating])
+                print("Data saved to CSV successfully.")
+        except Exception as e:
+            print("Error saving to CSV:", e)
 
     def display_header(self):
         st.set_page_config(page_title="Chat Bot", page_icon=":robot_face:")
@@ -44,7 +76,11 @@ class DocumentSearchApp:
         user_prompt = st.chat_input()
         if not user_prompt:
             return
-
+        if st.session_state.pending_interaction:
+            interaction = st.session_state.pending_interaction
+            interaction["rating"] = "N/A"
+            self.save_to_csv(**interaction)
+            st.session_state.pending_interaction = None
         st.session_state.messages.append(
             {"role": "user", "content": user_prompt})
         with st.chat_message("user"):
@@ -74,12 +110,46 @@ class DocumentSearchApp:
             response_container.markdown(full_response)
             st.session_state.messages.append(
                 {"role": "assistant", "content": full_response})
+            
+        st.session_state.pending_interaction = {
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "question": user_prompt,
+                "answer": full_response,
+                "rating": None
+            }
+
+    def submit_feedback(self, rating):
+        if rating > (
+                Constants.ZERO.value and st.session_state.pending_interaction):
+            interaction = st.session_state.pending_interaction
+            interaction["rating"] = rating
+            self.save_to_csv(**interaction)
+            st.session_state.pending_interaction = None
+            success = st.success("Thank you for your feedback!")
+            time.sleep(3)
+            success.empty()
+        else:
+            st.warning("Please provide a valid rating.")
+
+    def display_feedback_form(self):
+        if st.session_state.pending_interaction:
+            rating = st_star_rating(
+                label="Rate your experience:", maxValue=5, defaultValue=0)
+
+            if rating and rating > 0:  # Ensure a valid rating is selected
+                if "feedback_submitted" not in st.session_state:
+                    st.session_state.feedback_submitted = False
+
+                if not st.session_state.feedback_submitted:
+                    self.submit_feedback(rating)
+                    st.session_state.feedback_submitted = True
 
     def run(self):
         self.display_header()
         self.display_sidebar()
         self.display_messages()
         self.handle_user_input()
+        self.display_feedback_form()
 
 
 if __name__ == "__main__":

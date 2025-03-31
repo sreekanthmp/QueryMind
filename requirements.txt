@@ -20,3 +20,4 @@ langchain-community==0.3.14
 openai==1.59.5
 atlassian-python-api==3.41.16
 lxml
+st-star-rating==0.0.6

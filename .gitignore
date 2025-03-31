@@ -173,3 +173,4 @@ cython_debug/
 aisearch
 source
 chroma_db_search/
+*.csv
