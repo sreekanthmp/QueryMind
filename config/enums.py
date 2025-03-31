@@ -1,3 +1,11 @@
+from enum import Enum
+
+
+class Constants(Enum):
+    ZERO = 0
+    ONE = 1
+    FIVE = 5
+    THREE = 3
 
 
 FAILURE_MESSAGES = [
