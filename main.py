@@ -1,5 +1,5 @@
 import streamlit as st
-from config.enums import FAILURE_MESSAGES
+from config.enums import FAILURE_MESSAGES, Constants
 from src.rag.rag_chain import RAGChain
 from src.vectorstore.load_vectorstore import LoadVectorStore
 
@@ -17,6 +17,22 @@ class DocumentSearchApp:
         st.set_page_config(page_title="Chat Bot", page_icon=":robot_face:")
         st.markdown(
             "<h1 style='text-align: center;'>Document Search</h1>", unsafe_allow_html=True)
+
+    def display_sidebar(self):
+        with st.sidebar:
+            st.subheader("Available Pages")
+            all_pages = st.session_state.vectorstore.get_all_documents()
+            if all_pages:
+                seen_urls = set()
+                for i, metadata in enumerate(all_pages):
+                    url = metadata.get("url", None)
+                    if url not in seen_urls:
+                        seen_urls.add(url)
+                        page_name = metadata.get(
+                            "title") or f"Document {i + Constants.ONE.value}"
+                        st.markdown(f"[{page_name}]({url})")
+            else:
+                st.write("No pages found in the database.")
 
     def display_messages(self):
         with st.container():
@@ -61,6 +77,7 @@ class DocumentSearchApp:
 
     def run(self):
         self.display_header()
+        self.display_sidebar()
         self.display_messages()
         self.handle_user_input()
 
