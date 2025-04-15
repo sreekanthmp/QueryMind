@@ -18,6 +18,8 @@ class DocumentSearchApp:
         st.session_state.setdefault("rag_chain", RAGChain())
         if "pending_interaction" not in st.session_state:
             st.session_state.pending_interaction = None
+        if "conversation_history" not in st.session_state:
+            st.session_state.conversation_history = []
         self.csv_file = Constants.CSV_FILE.value
         self.initialize_csv()
 
@@ -94,6 +96,19 @@ class DocumentSearchApp:
                 status, chunks = st.session_state.rag_chain.rag_chain(
                     user_prompt)
                 if not status:
+                    # Get last two interactions
+                    history = st.session_state.conversation_history[-2:]
+
+                    # Only retry if there's history available
+                    if history:
+                        retry_prompt = (
+                            f"Previous context: {history}. "
+                            f"New question: '{user_prompt}'. "
+
+                        )
+                        status, chunks = st.session_state.rag_chain.rag_chain(
+                            retry_prompt)
+                if not status:
                     failure_message = FAILURE_MESSAGES[0]
                 else:
                     chunk_generator, _ = chunks
@@ -110,7 +125,11 @@ class DocumentSearchApp:
             response_container.markdown(full_response)
             st.session_state.messages.append(
                 {"role": "assistant", "content": full_response})
-            
+            st.session_state.conversation_history.append(
+                            full_response.lower().replace(user_prompt, "", 1))
+        st.session_state.conversation_history = (
+            st.session_state.conversation_history[-2:]
+        )
         st.session_state.pending_interaction = {
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "question": user_prompt,
