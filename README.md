@@ -1,4 +1,4 @@
-# ai-multi-file-content-extractor
+# querymind
 ai-multi-file-content-extractor is an AI-powered tool that extracts content from various file formats like PDFs, DOCX, and more. Using advanced text extraction techniques, it enables efficient processing of multiple files, simplifying content extraction for analysis, data mining, and automation tasks.
 
 # virtual environment
