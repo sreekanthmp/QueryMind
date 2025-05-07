@@ -50,7 +50,7 @@ class DocumentSearchApp:
     def display_header(self):
         st.set_page_config(page_title="Chat Bot", page_icon=":robot_face:")
         st.markdown(
-            "<h1 style='text-align: center;'>Document Search</h1>", unsafe_allow_html=True)
+            "<h1 style='text-align: center;'>QueryMind</h1>", unsafe_allow_html=True)
 
     def display_sidebar(self):
         with st.sidebar:
